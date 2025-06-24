@@ -74,7 +74,7 @@ st.markdown("""
 # 🔁 Load model and helpers
 @st.cache_resource
 def load_all():
-    model = load_model("emotion_model.h5")
+    model = load_model("emotion_model.keras")
     scaler = joblib.load("s_scaler.pkl")
     encoder = joblib.load("label_encoder.pkl")
     return model, scaler, encoder

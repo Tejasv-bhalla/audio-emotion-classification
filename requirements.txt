@@ -1,7 +1,7 @@
 streamlit
 numpy
 librosa
-tensorflow
+tensorflow==2.11.0
 scikit-learn
 matplotlib
 joblib

@@ -1,7 +1,7 @@
 streamlit==1.22.0
 numpy
 librosa
-tensorflow-cpu==2.11.0
+tensorflow
 scikit-learn
 matplotlib
 joblib

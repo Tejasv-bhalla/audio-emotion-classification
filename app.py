@@ -6,6 +6,7 @@ from tensorflow.keras.models import load_model
 import os
 import tempfile
 import matplotlib.pyplot as plt
+from pydub import AudioSegment
 
 # 🎨 Page config and styling
 st.set_page_config(
@@ -79,6 +80,19 @@ def load_all():
     return model, scaler, encoder
 
 model, scaler, encoder = load_all()
+
+# 🔄 Convert any format to WAV
+def convert_to_wav(file):
+    suffix = os.path.splitext(file.name)[-1]
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_audio:
+        temp_audio.write(file.read())
+        temp_audio_path = temp_audio.name
+
+    sound = AudioSegment.from_file(temp_audio_path)
+    temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    sound.export(temp_wav.name, format="wav")
+    return temp_wav.name
+
 
 # 🎼 Feature extraction
 def extract_features(file_path):

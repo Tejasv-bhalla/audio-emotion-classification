@@ -29,12 +29,8 @@ Predict human emotions from audio using a deep learning model deployed via Strea
 
 ## 🎥 Demo
 
-Watch the app in action below:
+🎥 [Watch Demo Video](demo.mp4)
 
-<video width="720" controls>
-  <source src="demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
 
 ---
 

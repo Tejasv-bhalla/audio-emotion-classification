@@ -4,16 +4,17 @@ import numpy as np
 import joblib
 from tensorflow.keras.models import load_model
 import os
+import tempfile
 import matplotlib.pyplot as plt
 
-# 🎨 Page config and enhanced styling
+# 🎨 Page config and styling
 st.set_page_config(
     page_title="🎧 Emotion Recognition",
     layout="centered",
     page_icon="🎵"
 )
 
-# Custom CSS for modern UI with sticky footer
+# Custom CSS
 st.markdown("""
     <style>
         :root {
@@ -27,9 +28,7 @@ st.markdown("""
             flex-direction: column;
             min-height: 100vh;
         }
-        .main {
-            flex: 1;
-        }
+        .main { flex: 1; }
         .title {
             font-size: 2.5rem;
             text-align: center;
@@ -50,13 +49,6 @@ st.markdown("""
             font-size: 1.1rem;
             padding: 0.5rem 1.5rem;
         }
-        .waveform-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
         .footer {
             text-align: center;
             padding: 1rem;
@@ -66,34 +58,29 @@ st.markdown("""
             border-top: 1px solid #eee;
             margin-top: 2rem;
         }
-        .stFileUploader {
-            background: #f0f2f6;
-            border-radius: 8px;
-            padding: 1rem;
-        }
     </style>
 """, unsafe_allow_html=True)
 
-# Main content container
+# Main container
 st.markdown("<div class='main'>", unsafe_allow_html=True)
 
-# Header
+# Title & subtitle
 st.markdown("""
     <div class="title">🎵 Emotion Recognition from Audio</div>
-    <div class="subtitle">Upload a <b>.wav</b> file to detect emotional content</div>
+    <div class="subtitle">Upload an <b>audio file</b> (wav, mp3, flac, etc.) to detect emotional content</div>
 """, unsafe_allow_html=True)
 
-# 🔁 Load model, encoder, and scaler
+# 🔁 Load model and helpers
 @st.cache_resource
 def load_all():
-    model = load_model("best_model.h5")
+    model = load_model("emotion_model.h5")
+    scaler = joblib.load("s_scaler.pkl")
     encoder = joblib.load("label_encoder.pkl")
-    scaler = joblib.load("scaler.pkl")
-    return model, encoder, scaler
+    return model, scaler, encoder
 
-model, encoder, scaler = load_all()
+model, scaler, encoder = load_all()
 
-# 🎼 Feature Extraction Function
+# 🎼 Feature extraction
 def extract_features(file_path):
     y, sr = librosa.load(file_path, duration=3, offset=0.5)
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
@@ -101,64 +88,65 @@ def extract_features(file_path):
 
 # Sidebar upload
 st.sidebar.header("🔊 Upload Audio")
-uploaded_file = st.sidebar.file_uploader("Choose WAV file", type=["wav"], label_visibility="collapsed")
+uploaded_file = st.sidebar.file_uploader(
+    "Choose an audio file", 
+    type=["wav", "mp3", "ogg", "flac", "m4a"], 
+    label_visibility="collapsed"
+)
 st.sidebar.markdown("""
 ---
-**How to use:**
-- Upload a short, clear `.wav` file (speech or expressive sound)
-- Make sure the audio is not silent and is in WAV format
-- For best results, use files under 10 seconds
+**Instructions:**
+- Upload a clear speech or expressive `.wav`, `.mp3`, etc.
+- Keep duration under 10 seconds for best accuracy
+- Make sure it's not silent or corrupted
 """)
 
-# 🎯 Run prediction and visualization
+# 🎯 Process file
 if uploaded_file is not None:
-    # Save uploaded file
-    with open("temp.wav", "wb") as f:
-        f.write(uploaded_file.read())
-    
-    # Audio player
-    st.audio("temp.wav", format="audio/wav")
-    
-    with st.spinner("Analyzing audio..."):
-        # Extract features and waveform
-        features, y, sr = extract_features("temp.wav")
-        
-        # Create waveform visualization
+    # Save to temporary file
+    suffix = os.path.splitext(uploaded_file.name)[-1]
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+        tmp_file.write(uploaded_file.read())
+        temp_path = tmp_file.name
+
+    # Play audio
+    st.audio(temp_path)
+
+    with st.spinner("🔍 Analyzing audio..."):
+        features, y, sr = extract_features(temp_path)
+
+        # Plot waveform
         fig, ax = plt.subplots(figsize=(10, 3))
         librosa.display.waveshow(y, sr=sr, ax=ax, color="#3f51b5")
         ax.set_title("Audio Waveform", fontsize=14)
         ax.set_ylabel("Amplitude")
         ax.set_xlabel("Time (s)")
         ax.grid(alpha=0.3)
-        plt.tight_layout()
-        
-        # Display waveform
-        st.markdown("### Audio Waveform")
+        st.markdown("### 📈 Audio Waveform")
         st.pyplot(fig)
-        
-        # Run prediction
+
+        # Scale and predict
         scaled = scaler.transform(features.reshape(1, -1))
         prediction = model.predict(scaled)
         label = encoder.inverse_transform([np.argmax(prediction)])
         confidence = np.max(prediction) * 100
 
-    # Results
+    # Display results
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Predicted Emotion", f"{label[0]}", help="Detected emotional state")
+        st.metric("Predicted Emotion", f"{label[0]}")
     with col2:
-        st.metric("Confidence", f"{confidence:.2f}%", delta_color="off")
+        st.metric("Confidence", f"{confidence:.2f}%")
 
-    # Clean up temp file
-    os.remove("temp.wav")
+    # Clean up
+    os.remove(temp_path)
 else:
-    st.info("⬅️ Upload a .wav file to begin analysis")
+    st.info("⬅️ Upload a supported audio file to begin")
 
 # Footer
 st.markdown("</div>", unsafe_allow_html=True)
 st.markdown("""
     <div class="footer">
-        Emotion Recognition System • Using Deep Learning • 
-        <span style="color: var(--primary);">Streamlit</span>
+        Emotion Recognition System • Built with ❤️ using Streamlit
     </div>
 """, unsafe_allow_html=True)

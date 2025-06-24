@@ -8,6 +8,7 @@ Predict human emotions from audio using a deep learning model deployed via Strea
 ## 📚 Table of Contents
 
 - [🎥 Demo](#-demo)
+- [🌐 Live App](#-live-app)
 - [📌 Overview](#-overview)
 - [✅ Features](#-features)
 - [🧱 Tech Stack](#-tech-stack)
@@ -30,6 +31,13 @@ Predict human emotions from audio using a deep learning model deployed via Strea
 ## 🎥 Demo
 
 🎥 [Watch Demo Video](demo.mp4)
+
+
+---
+
+## 🌐 Live App
+
+👉 [Click here to try the live demo](https://audio-emotion-classification-vpp6btlmy65vwdndx9rcln.streamlit.app/)
 
 
 ---
@@ -174,7 +182,6 @@ If you want to add a demo link to the public app, you can edit this section:
 Got suggestions or want to collaborate?
 
 - GitHub: [@Tejasv-bhalla](https://github.com/Tejasv-bhalla)
-- Email: [Add your email here if you want]
 
 ---
 

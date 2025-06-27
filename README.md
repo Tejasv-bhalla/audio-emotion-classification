@@ -135,14 +135,14 @@ streamlit run app.py
 ## 🧩 Requirements (see `requirements.txt`)
 
 ```txt
-streamlit==1.35.0
-numpy==1.24.4
-librosa==0.10.1
-tensorflow==2.12.0
-scikit-learn==1.2.2
-joblib==1.3.2
-matplotlib==3.7.1
-soundfile==0.12.1
+streamlit==1.22.0
+numpy
+librosa
+tensorflow
+scikit-learn
+matplotlib
+joblib
+soundfile
 ```
 
 ---
